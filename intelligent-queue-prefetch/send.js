@@ -11,12 +11,22 @@ amqp.connect({
   heartbeat: 0
 }, function(err, conn) {
   conn.createChannel(function(err, ch) {
-    var q = 'task_queue';
-    var msg = process.argv.slice(2).join(' ') || "Hello World!";
+    let i = 0;
+    for(i = 0; i < 10; i ++) {
+      let processTime = "."
+      var q = 'task_queue';
+      var random = Math.floor(Math.random() * (10 - 0));
+      console.log(random);
+      while(random != 0) {
+        processTime = processTime + '.'
+        random = random - 1
+      }
+      var msg = `Hello World ${processTime}! Message number : ${i}`
+      ch.assertQueue(q, {durable: true});
+      ch.sendToQueue(q, new Buffer(msg), {persistent: true});
+      console.log(" [x] Sent '%s'", msg);
+    }
 
-    ch.assertQueue(q, {durable: true});
-    ch.sendToQueue(q, new Buffer(msg), {persistent: true});
-    console.log(" [x] Sent '%s'", msg);
   });
   setTimeout(function() { conn.close(); process.exit(0) }, 500);
 });
